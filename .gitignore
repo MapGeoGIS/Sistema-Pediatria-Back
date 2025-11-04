@@ -1,0 +1,84 @@
+# ========================
+# Node.js / React / Express
+# ========================
+
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+*.log.*
+log.txt
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Compilados / Builds
+dist/
+build/
+.cache/
+.next/
+out/
+coverage/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Archivos de test
+jest-test-results.json
+coverage-final.json
+
+# Datos temporales
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Archivos de PostgreSQL / DB locales
+*.sql
+*.dump
+pgdata/
+db_data/
+
+# Docker
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# Archivos de desarrollo
+*.local.js
+*.local.json
+
+# Archivos de configuración personales
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# Reportes y perfiles
+*.tgz
+npm-debug.log
+.yarn-integrity
+
+# Otros
+*.orig
