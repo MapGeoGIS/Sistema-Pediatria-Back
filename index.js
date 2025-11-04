@@ -1,3 +1,5 @@
+require("dotenv").config();
+const db = require("./src/db");
 const server = require("./src/server");
 const Pacientes = require("./src/models/Pacientes");
 const Consultas = require("./src/models/Consultas");
@@ -7,11 +9,16 @@ const Laboratorios = require("./src/models/Laboratorios");
 const Usuarios = require("./src/models/Usuarios");
 const Turnos = require("./src/models/Turnos");
 const Infusiones = require("./src/models/Infusiones");
+const Resumenes = require("./src/models/Resumenes");
 
 const PORT = process.env.PORT || 3001;
 
 (async () => {
   try {
+    // Verificar conexión antes de sincronizar
+    await db.authenticate();
+    console.log("Conexión a la base de datos verificada");
+
     // Sincronizar ambos modelos
     await Promise.all([
       Pacientes.sync(), // sincroniza tabla Pacientes
@@ -22,6 +29,7 @@ const PORT = process.env.PORT || 3001;
       Usuarios.sync(),
       Turnos.sync(),
       Infusiones.sync(),
+      Resumenes.sync(),
     ]);
 
     console.log("Todos los modelos sincronizados");

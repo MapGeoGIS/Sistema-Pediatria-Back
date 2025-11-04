@@ -1,12 +1,13 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
-const { USER, PASSWORD, HOST, DB_PORT, BDD } = process.env;
+const { BDD, DB_USER, DB_PASS, DB_PORT, DB_HOST } = process.env;
 
-//Conexion con la base de datos
-const database = new Sequelize(
-  `postgres://${USER}:${PASSWORD}@${HOST}:${DB_PORT}/${BDD}`,
-  { logging: false }
-);
+const database = new Sequelize(BDD, DB_USER, DB_PASS, {
+  host: DB_HOST,
+  port: DB_PORT,
+  dialect: 'postgres',
+  logging: false,
+});
 
 // Verificar la conexión
 database.authenticate()
