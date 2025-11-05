@@ -55,8 +55,6 @@ const Resumenes = database.define(
       tableName: 'Resumenes',
       schema: 'public',
       timestamps: true,
-      // created_at: 'created_at',
-      // updated_at: 'updated_at',
     }
   );
 

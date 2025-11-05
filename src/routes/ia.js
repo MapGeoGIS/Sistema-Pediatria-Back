@@ -4,6 +4,7 @@ const router = express.Router();
 const Resumenes = require('../models/Resumenes');
 const Pacientes = require('../models/Pacientes');
 const Consultas = require('../models/Consultas');
+const { generateClinicalSummary } = require('../helpers/iaResumeGenerator');
 const { verifyToken, verifyRole } = require("../middlewares/auth");
 
 
@@ -21,29 +22,29 @@ router.post("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
     }
 
     // verificar si existe un resumen para el paciente
-    let resumen;
+    let resumeIAstored;
     try {
-        resumen = await Resumenes.findOne({ where: { id_paciente: paciente.id_paciente } });
+        resumeIAstored = await Resumenes.findOne({ where: { id_paciente: paciente.id_paciente } });
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error: "Error al verificar resumen" });
     }
 
     // si el resumen existe, veirificar que este actualizado
-    if (resumen) {
+    if (resumeIAstored) {
         // obtengo la consulta mas actual
         const consultaMasActual = await Consultas.findOne(
             {
-                where: { paciente_id: paciente.id },
+                where: { origin_id_paciente: paciente.origin_id },
                 order: [
-                    [Sequelize.literal('GREATEST(COALESCE("updatedAt","1970-01-01"), "createdAt")'), 'DESC']
+                    [Sequelize.literal("GREATEST(COALESCE(\"updatedAt\",'1970-01-01'::timestamp), \"createdAt\")"), 'DESC']
                 ]
             });
         // comparo fechas de resumen con la consulta mas actual
-        const fechaResumen = new Date(resumen.updatedAt);
+        const fechaResumen = new Date(resumeIAstored.updatedAt);
         const fechaConsulta = new Date(consultaMasActual.updatedAt);
         if (fechaResumen > fechaConsulta)
-            return res.status(200).json(resumen.resumen);
+            return res.status(200).json(resumeIAstored);
     
     }
 
@@ -60,11 +61,29 @@ router.post("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
     }
 
     // crear el resumen llamando a la IA
+    let resumeIaGenerated;
     try {
-        resumen = await Resumenes.create(req.body);
-        return res.status(201).json(resumen);
+        resumeIaGenerated = await generateClinicalSummary(paciente, consultas);
+        // return res.status(201).json(resumen);
     } catch (err) {
-        return res.status(500).json({ error: "Error al crear resumen" });
+        return res.status(500).json({ error: "Error al crear resumen", details: err.message});
+    }
+
+    // almacenar el resumen en la base de datos
+    try {
+        const resumeIaNew = await Resumenes.create(
+            { 
+                id_paciente: paciente.id_paciente, 
+                origin_id: paciente.origin_id,
+                createdAt: new Date(),
+                evoluciones: 0,
+                consultas: consultas.length,
+                resumen: resumeIaGenerated,
+            });
+        return res.status(201).json(resumeIaNew);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Error al almacenar resumen", details: error.message });
     }
 
 });
