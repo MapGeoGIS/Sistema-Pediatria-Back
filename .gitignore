@@ -339,3 +339,4 @@ uploads/
 temp/
 build/
 >>>>>>> cd80337ea3c15c4f11ca1307e34dd7c04c39d39a
+.env
