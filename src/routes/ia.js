@@ -32,7 +32,7 @@ router.post("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
 
     // si el resumen existe, veirificar que este actualizado
     if (resumeIAstored) {
-        // obtengo la consulta mas actual
+        // obtengo la consulta mas actual por fecha de actualizacion o creacion
         const consultaMasActual = await Consultas.findOne(
             {
                 where: { origin_id_paciente: paciente.origin_id },
@@ -41,10 +41,14 @@ router.post("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
                 ]
             });
         // comparo fechas de resumen con la consulta mas actual
-        const fechaResumen = new Date(resumeIAstored.updatedAt);
-        const fechaConsulta = new Date(consultaMasActual.updatedAt);
-        if (fechaResumen > fechaConsulta)
-            return res.status(200).json(resumeIAstored);
+        if (consultaMasActual) {
+            const fechaResumen = new Date(resumeIAstored.updatedAt);
+            const fechaConsulta = new Date(consultaMasActual.updatedAt);
+            if (fechaResumen > fechaConsulta)
+                return res.status(200).json(resumeIAstored);
+        }else{
+            return res.status(400).json({ error: 'el paciente no tiene consultas' });
+        }
     
     }
 
@@ -54,7 +58,7 @@ router.post("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
     let consultas;
     try {
         consultas = await Consultas.findAll({ where: { origin_id_paciente: paciente.origin_id } });
-        if (!consultas) return res.status(400).json({ error: 'el paciente no tiene consultas' });
+        if (consultas.length == 0) return res.status(400).json({ error: 'el paciente no tiene consultas' });
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error: 'Error al procesar las consultas' });
